@@ -1,89 +1,120 @@
-import React, { useState, Component } from 'react';
+import React, { useState, useEffect, use } from 'react';
 
-class Form extends Component {
-    constructor(props) {
-        super(props)
+const Form = ({ handleSubmit, initialData }) => {
+    const initialState = {
+        title: '',
+        location: '',
+        body: '',
+        question: '',
+        feeling: '',
+        reflectsContext: false,
+        contextNote: ''
+    };
 
-        this.initialState = {
-            title: '',
-            location: '',
-            body: '',
-            question: '',
-            feeling: '',
+    const [formData, setFormData] = useState(initialData ? { ...initialData } : initialState);
+
+    useEffect(() => {
+        if (initialData) {
+            setFormData({ ...initialData });
+        } else {
+            setFormData(initialState);
         }
+    }, [initialData]);
 
-        this.state = this.initialState
-    }
+    const handleChange = (event) => {
+        const { name, value, type, checked } = event.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
 
-    handleChange = event => {
-        const { name, value } = event.target
-
-        this.setState({
-            [name]: value
-        })
-    }
-
-    submitForm = () => {
+    const submitForm = () => {
         const timestamp = new Date().toLocaleString();
         const entryWithTimestamp = {
-            ...this.state,
+            ...formData,
             datetime: timestamp
         };
-        this.props.handleSubmit(entryWithTimestamp);
-        this.setState(this.initialState);
-    }
+        handleSubmit(entryWithTimestamp);
+        setFormData(initialState);
+    };
 
-    render() {
-        const { title, location, body, question, feeling } = this.state;
+    const { title, location, body, question, feeling, reflectsContext, contextNote } = formData;
 
-        return (
-            <div>
-                <form>
-                    <label>Title</label>
+    return (
+        <div>
+            <form onSubmit={e => { e.preventDefault(); submitForm(); }}>
+                <label>Title</label>
+                <input
+                    placeholder="Enter Title"
+                    type="text"
+                    name="title"
+                    id="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                />
+                <label>Location</label>
+                <input
+                    placeholder="Location"
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                />
+                <label>Entry</label>
+                <textarea
+                    placeholder="What do you notice?"
+                    type="text"
+                    name="body"
+                    value={formData.body}
+                    onChange={handleChange}
+                ></textarea>
+                <label>
                     <input
-                        placeholder="Enter Title"
-                        type="text"
-                        name="title"
-                        id="title"
-                        value={title}
-                        onChange={this.handleChange} />
-                    <label>Location</label>
-                    <input
-                        placeholder="Location"
-                        type="textarea"
-                        name="location"
-                        id="location"
-                        value={location}
-                        onChange={this.handleChange} />
-                    <label>Entry</label>
-                    <input
-                        placeholder="What do you notice?"
-                        type="textarea"
-                        name="body"
-                        id="body"
-                        value={body}
-                        onChange={this.handleChange} />
-                    <label>Questions</label>
-                    <input
-                        placeholder="What questions do you have about it?"
-                        type="textarea"
-                        name="question"
-                        id="question"
-                        value={question}
-                        onChange={this.handleChange} />
-                    <label>Feeling</label>
-                    <input
-                        placeholder="How does it make you feel?"
-                        type="textarea"
-                        name="feeling"
-                        id="feeling"
-                        value={feeling}
-                        onChange={this.handleChange} />
-                </form>
-                <button onClick={this.submitForm}>Submit</button>
-            </div>
-        )
-    }
-}
+                        type="checkbox"
+                        name="reflectsContext"
+                        checked={formData.reflectsContext}
+                        onChange={handleChange}
+                    />
+                    This observation reflects something about this place, season, or era.
+                </label>
+                {formData.reflectsContext && (
+                    <div>
+                        <label>What does it say?</label>
+                        <textarea
+                            type="text"
+                            name="contextNote"
+                            placeholder="Optional context reflection"
+                            value={formData.contextNote}
+                            onChange={handleChange}
+                        ></textarea>
+                    </div>
+                )}
+                <label> Questions</label>
+                <textarea
+                    placeholder="What questions do you have about it?"
+                    type="text"
+                    name="question"
+                    value={formData.question}
+                    onChange={handleChange}
+                ></textarea>
+                <label>Feeling</label>
+                <input
+                    placeholder="How does it make you feel?"
+                    type="text"
+                    name="feeling"
+                    value={formData.feeling}
+                    onChange={handleChange}
+                />
+            </form>
+            <button 
+                onClick={submitForm}
+                style={{marginTop: '12px' }}
+            >
+                Submit
+            </button>
+        </div>
+    );
+};
 
 export default Form;
