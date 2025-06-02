@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 
 const EntryBody = props => {
-    const lines = props.entryData.map((line, index) => {
+    const entries = props.entryData.map((entry, index) => {
         return (
-            <div key={index}>
-                <h2>{line.title}</h2>
-                <h3>Location: {line.location}</h3>
-                <p>Observation: {line.body}</p>
-                {line.contextNote && (
-                    <p><strong>Context reflection:</strong> {line.contextNote}</p>
+            <div key={entry.id}>
+                <h2>{entry.title}</h2>
+                <h3>Location: {entry.location}</h3>
+                <p>Observation: {entry.body}</p>
+                {entry.contextNote && (
+                    <p><strong>Context reflection:</strong> {entry.contextNote}</p>
                 )}
-                <p>Wondering: {line.question}</p>
-                <p>I'm feeling {line.feeling}.</p>
-                <p>Kilo made at: {new Date(line.datetime).toLocaleDateString('en-US', {
+                <p>Wondering: {entry.question}</p>
+                <p>I'm feeling {entry.feeling}.</p>
+                <p>Kilo made at: {new Date(entry.datetime).toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'short',
@@ -21,14 +21,13 @@ const EntryBody = props => {
                     minute: '2-digit'
                 })}
                 </p>
-                <button onClick={() => props.editEntry(line, index)}>Edit</button>
+                <button onClick={() => props.editEntry(entry, index)}>Edit</button>
                 <button
                     onClick={() => {
                         if (window.confirm("Are you sure you want to delete this entry?")) {
-                            props.removeEntry(index);
+                            props.removeEntry(entry.id);
                         }
-                    }}
-                >
+                    }}>
                     Delete
                 </button>
             </div>
@@ -37,7 +36,7 @@ const EntryBody = props => {
 
     return (
         <div>
-            {lines}
+            {entries}
         </div>
     );
 };
@@ -48,9 +47,9 @@ const Entries = (props) => {
     return (
         <div>
             <h2>My Observations</h2>
-            <EntryBody 
-                entryData={entryData} 
-                removeEntry={removeEntry} 
+            <EntryBody
+                entryData={entryData}
+                removeEntry={removeEntry}
                 editEntry={editEntry}
             />
         </div>

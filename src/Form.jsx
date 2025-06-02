@@ -1,55 +1,58 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Form = ({ handleSubmit, initialData }) => {
-    const initialState = {
+    const [formData, setFormData] = useState({
         title: '',
         location: '',
         body: '',
-        question: '',
+        datetime: '',
+        contextNote: '',
         feeling: '',
+        question: '',
         reflectsContext: false,
-        contextNote: ''
-    };
+    });
 
-    const [formData, setFormData] = useState(initialData ? { ...initialData } : initialState);
-
+//this is to populate the form if editing an existing entry
     useEffect(() => {
         if (initialData) {
-            setFormData({ ...initialData });
+            setFormData({ 
+            ...initialData,
+            datetime: initialData.datetime || new Date.toLocaleString()
+        });
         } else {
-            setFormData(initialState);
+            setFormData(prev => ({ ...prev, datetime: new Date().toLocaleString() }));
         }
     }, [initialData]);
 
-    const handleChange = (event) => {
-        const { name, value, type, checked } = event.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+    //convert empty strings to null on submit
+
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        const cleanedData = Object.fromEntries(
+            Object.entries(formData).map(([key, value]) => [
+                key,
+                typeof value === 'string' && value.trim() === '' ? null: value
+            ])
+        );
+        handleSubmit(cleanedData);
     };
 
-    const submitForm = () => {
-        const timestamp = new Date().toLocaleString();
-        const entryWithTimestamp = {
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        const finalValue = type === 'checkbox' ? checked: value;
+        setFormData({
             ...formData,
-            datetime: timestamp
-        };
-        handleSubmit(entryWithTimestamp);
-        setFormData(initialState);
+            [name]: finalValue
+        });
     };
-
-    const { title, location, body, question, feeling, reflectsContext, contextNote } = formData;
 
     return (
-        <div>
-            <form onSubmit={e => { e.preventDefault(); submitForm(); }}>
+            <form onSubmit={handleFormSubmit}>
                 <label>Title</label>
                 <input
                     placeholder="Enter Title"
                     type="text"
                     name="title"
-                    id="title"
                     value={formData.title}
                     onChange={handleChange}
                 />
@@ -90,7 +93,7 @@ const Form = ({ handleSubmit, initialData }) => {
                         ></textarea>
                     </div>
                 )}
-                <label> Questions</label>
+                <label>Questions</label>
                 <textarea
                     placeholder="What questions do you have about it?"
                     type="text"
@@ -106,14 +109,17 @@ const Form = ({ handleSubmit, initialData }) => {
                     value={formData.feeling}
                     onChange={handleChange}
                 />
+                <button
+                    type="submit"
+                    style={{ 
+                        marginTop: '12px',
+                        width: 'fit-content',
+                        padding: '8px 16px',
+                     }}
+                >
+                    Save Entry
+                </button>
             </form>
-            <button 
-                onClick={submitForm}
-                style={{marginTop: '12px' }}
-            >
-                Submit
-            </button>
-        </div>
     );
 };
 
